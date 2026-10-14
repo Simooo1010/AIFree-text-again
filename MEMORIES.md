@@ -8,6 +8,8 @@ Annotare solo ciò che è essenziale ed efficace per il progetto. Data della pri
 - L'utente ha inizialmente espresso l'obiettivo "non essere riconosciuti da Pangram e simili". Ho dichiarato che non costruisco un bypass dei detector come obiettivo. L'utente ha scelto A+B+C. Se la richiesta torna su "bypass", ricordare questo confine e chiedere conferma.
 - Fedeltà = fatti/numeri/nomi/citazioni, struttura/formattazione, tono/registro, lunghezza invariati.
 
+- BYOK: l'utente può inserire la propria API key (Claude/OpenAI) per il livello potenziato; il base resta gratuito. Dettagli e vincoli in CLAUDE.md. Da ricercare: riscrivere con un LLM può reintrodurre lo stile del modello stesso.
+
 ## Ipotesi da verificare nella ricerca (NON ancora verificate)
 - SynthID-Text è usato solo sui modelli Google? ChatGPT e Claude non applicano watermark statistici pubblici? Se vero, il "timbro" è stile, non watermark.
 - I detector (Pangram, GPTZero, Turnitin) sono classificatori di stile, non lettori di watermark.

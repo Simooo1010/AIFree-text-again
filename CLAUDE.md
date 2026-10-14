@@ -33,8 +33,14 @@ Dopo l'elaborazione restano invariati: fatti, numeri, nomi, citazioni; struttura
 - Tono diretto, senza riempitivi. Segnalare apertamente le falle logiche invece di assecondare.
 - Per chiarire il contesto, usare AskUserQuestion.
 
+## Modello di servizio: BYOK
+- Livello base gratuito: regole deterministiche + eventuali modelli piccoli/open source (llama, gemma, qwen).
+- Livello potenziato opzionale: l'utente inserisce la propria API key (Anthropic, OpenAI, ecc.). Il costo resta suo.
+- Vincoli: la chiave non va mai loggata né salvata sul server per default (preferire browser/sessione); interfaccia provider-agnostica; dichiarare in UI che il testo viene inviato al provider; il prompt di sistema descrive il compito onestamente (editing di naturalezza).
+- Un modello più grande non garantisce qualità: conta la pipeline (analisi, riscrittura mirata, verifica di fedeltà), da misurare.
+
 ## Decisioni aperte
-- Ruolo dell'AI nella pipeline (API vs locale vs ibrido): decidere dopo la ricerca.
+- Ruolo dell'AI nella pipeline di base (regole vs locale vs ibrido): decidere dopo la ricerca. Il livello BYOK è già deciso in linea di principio.
 - Stack e architettura: dopo la ricerca.
 - Hosting: prima uso personale, poi apertura al pubblico.
 
