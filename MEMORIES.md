@@ -56,10 +56,36 @@ Legenda: [V] letto su pagina primaria; [S] fonte secondaria/riassunto di ricerca
 - Modelli piccoli permissivi: Qwen3 4B/8B, Ministral 3 8B; Llama licenza restrittiva. Browser/WebGPU fino a ~4B quantizzato; oltre serve server. I modelli piccoli sbagliano numeri e citazioni.
 - BYOK: interfaccia provider-agnostica (Anthropic, OpenAI, Gemini, adapter "OpenAI-compatibile"); chiave solo nel browser, chiamate dirette (vedi sezione verificata sopra: solo via SDK con `dangerouslyAllowBrowser`); eventuale proxy stateless, senza log, con allowlist host.
 
-## Decisioni da prendere con l'utente (aperte)
-1. Watermark: i marchi sono un meccanismo di provenienza previsto da norma UE. Cosa vuole l'utente dal prodotto? Posizione corrente di Claude: il prodotto NON dichiara né mira a rimuovere watermark; una naturalizzazione profonda può indebolirli come effetto collaterale, e questo va detto onestamente in UI.
-2. Stack e architettura (TypeScript/Vercel con worker Python opzionale?), dopo la sintesi.
+## Architettura: decisioni prese (2026-10-14/15)
+Dettaglio operativo in CLAUDE.md ("Architettura e stack"). Progettata da un agente Plan (Opus, sforzo High) e rivista da me. Decisioni dell'utente via AskUserQuestion:
+- Frontend: Vite + React, SPA statica (non Next.js).
+- Livello gratuito iniziale: solo regole fino alla fase P6 (BYOK/modelli).
+- Paternità (B): catena di hash locale; timestamp esterno RFC 3161 rinviato.
+- Corpus: solo fonti libere; niente testi donati né API commerciali dei detector.
+- Mia decisione, da confermare: PDF per scritture che richiedono shaping → export DOCX o stampa PDF del browser.
+
+### Roadmap (sforzo massimo High per ogni fase)
+- P0 monorepo, CI, schemi Zod, skeleton CLI, loader dei pack. Opus.
+- P1 pacchetto igiene + corpus casi limite (persiano, arabo, hindi, emoji ZWJ, bandiere, spazi francesi); done-when: suite 100% e property test su stringhe valide invariate. Opus implementa, Sonnet ricerca fonti/licenze.
+- P2 motore di stile + pack IT/EN v0 + vista B nella CLI; done-when: findings con spiegazioni, tasso di falsi allarmi misurato su 50 testi umani. Opus; Sonnet prepara le liste seed.
+- P3 span protetti, fedeltà strati 1–3, modifiche a regole, budget di diff; done-when: 0 violazioni sul dev set. Opus.
+- P4 DOCX (patch OOXML), PDF (estrazione/rigenerazione/OCR), sanificazione metadati con verifica dopo la riapertura; done-when: round-trip golden. Opus.
+- P5 web app local-first, revisione, cronologia, dossier di paternità, deploy personale; done-when: nessun testo lascia il dispositivo (verificato dalla scheda rete). Opus; verifica con Opus.
+- P6 adapter BYOK, WebLLM/endpoint locale, riscrittura di span con gate, NLI/giudice; done-when: gate di fedeltà tengono e le impronte del riscrittore ≤ baseline a sole regole. Opus.
+- P7 generazione lessici da dati, split di test congelato, harness detector interno (solo FP su testo umano; opt-in, mai in CI). Sonnet raccoglie dati, Opus scrive codice.
+- P8 lancio pubblico: proxy, termini d'uso, privacy, traduzione UI, altri pack linguistici. Opus; Sonnet ricerca.
+
+### Metriche di valutazione
+Fedeltà: violazioni degli span protetti = 0 (gate CI), tasso di entailment bidirezionale, similarità embedding, rapporto di lunghezza, registro mantenuto. Naturalezza: calo della densità di termini in lista, spread della lunghezza delle frasi entro ±10%, distanza di modifica, nuove impronte del riscrittore = 0, preferenza umana a coppie in cieco (IT/EN). Igiene: precision/recall sul corpus dei casi limite, zero danni a ZWJ/ZWNJ/Tags legittimi (gate CI). Funzione B: falsi allarmi ogni 1000 parole su testo umano.
+
+### Rischi principali
+pdf-lib senza shaping per alcune scritture; testo DOCX spezzato in molti run (edit che attraversano i run perdono formattazione: ancorare al primo run, test golden); liste lessicali che invecchiano; modelli piccoli che alterano numeri (gate senza bypass); furto di chiave BYOK via XSS (CSP rigida, nessuno script di terzi, chiave solo in memoria, `localStorage` mai); rilevamento lingua incerto su testi brevi/misti (per blocco + override); percezione e uso improprio (posizionamento, copy onesto sui watermark, termini d'uso). Il dossier di paternità con hash locale è auto-attestato: valore probatorio debole.
+
+## Decisioni ancora aperte
+1. Via libera esplicito per iniziare P0 (finora solo pianificazione).
+2. Ricontrollo con accesso diretto alla rete dei dati non verificati (elenco nel Log di ricerca).
 3. Set di lingue di riferimento per la qualità oltre a IT/EN.
+4. Conferma della scelta sul PDF per scritture con shaping.
 
 ## Piano di ricerca (subagent Sonnet/Haiku, read-only)
 1. Stato dell'arte dei detector e falsi positivi.
